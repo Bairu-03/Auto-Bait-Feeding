@@ -159,8 +159,7 @@ int main(void)
     Key_Init();
     DS18B20_Init();
     MyRTC_Init();
-
-    // Servo_Init();
+    Servo_Init();
     // Servo_SetAngle(0);
 
     FeedInterval[0] = BKP_ReadBackupRegister(BKP_DR2);
@@ -196,123 +195,144 @@ int main(void)
             KeyNum = 0;
             break;
         case 4: // Left键
-            OLED_Clear();
-            if (SetMenu_CurL == 1)
+            if (UIpage)
             {
-                SetMenu_CurL = 3;
-                SetMenu_CurC = 89;
-            }
-            else if ((SetMenu_CurL == 3) || (SetMenu_CurL == 7))
-            {
-                SetMenu_CurC -= 24;
-                if (SetMenu_CurC <= 41)
-                    SetMenu_CurC = 41;
-            }
-            else if (SetMenu_CurL == 5)
-            {
-                SetMenu_CurL = 7;
-                SetMenu_CurC = 89;
+                OLED_Clear();
+                if (SetMenu_CurL == 1)
+                {
+                    SetMenu_CurL = 3;
+                    SetMenu_CurC = 89;
+                }
+                else if ((SetMenu_CurL == 3) || (SetMenu_CurL == 7))
+                {
+                    SetMenu_CurC -= 24;
+                    if (SetMenu_CurC <= 41)
+                        SetMenu_CurC = 41;
+                }
+                else if (SetMenu_CurL == 5)
+                {
+                    SetMenu_CurL = 7;
+                    SetMenu_CurC = 89;
+                }
             }
             KeyNum = 0;
             break;
         case 6: // Right键
-            OLED_Clear();
-            if (SetMenu_CurL == 3)
+            if (UIpage)
             {
-                SetMenu_CurC += 24;
-                if (SetMenu_CurC > 97)
+                OLED_Clear();
+                if (SetMenu_CurL == 3)
                 {
-                    SetMenu_CurL = 1;
-                    SetMenu_CurC = 112;
+                    SetMenu_CurC += 24;
+                    if (SetMenu_CurC > 97)
+                    {
+                        SetMenu_CurL = 1;
+                        SetMenu_CurC = 112;
+                    }
                 }
-            }
-            else if (SetMenu_CurL == 7)
-            {
-                SetMenu_CurC += 24;
-                if (SetMenu_CurC > 97)
+                else if (SetMenu_CurL == 7)
                 {
-                    SetMenu_CurL = 5;
-                    SetMenu_CurC = 112;
+                    SetMenu_CurC += 24;
+                    if (SetMenu_CurC > 97)
+                    {
+                        SetMenu_CurL = 5;
+                        SetMenu_CurC = 112;
+                    }
                 }
             }
             KeyNum = 0;
             break;
         case 8: // Up键
-            OLED_Clear();
-            if (SetMenu_CurC == 112)
+            if (UIpage)
             {
-                SetMenu_CurL = 1;
-            }
-            else if (SetMenu_CurL == 3)
-            {
-                if (SetMenu_CurC == 89)
-                    if (TempT[5] < 59)
-                        TempT[5] += 1;
-                    else
-                        TempT[5] = 0;
-                if (SetMenu_CurC == 65)
-                    if (TempT[4] < 59)
-                        TempT[4] += 1;
-                    else
-                        TempT[4] = 0;
-                if (SetMenu_CurC == 41)
-                    if (TempT[3] < 23)
-                        TempT[3] += 1;
-                    else
-                        TempT[3] = 0;
-            }
-            else if (SetMenu_CurL == 7)
-            {
-                if (SetMenu_CurC == 89)
-                    if (TempFI[2] < 59)
-                        TempFI[2] += 1;
-                    else
-                        TempFI[2] = 0;
-                if (SetMenu_CurC == 65)
-                    if (TempFI[1] < 59)
-                        TempFI[1] += 1;
-                    else
-                        TempFI[1] = 0;
-                if (SetMenu_CurC == 41)
-                    if (TempFI[0] < 23)
-                        TempFI[0] += 1;
-                    else
-                        TempFI[0] = 0;
+                OLED_Clear();
+                if (SetMenu_CurC == 112)
+                {
+                    SetMenu_CurL = 1;
+                }
+                else if (SetMenu_CurL == 3)
+                {
+                    if (SetMenu_CurC == 89)
+                        if (TempT[5] < 59)
+                            TempT[5] += 1;
+                        else
+                            TempT[5] = 0;
+                    if (SetMenu_CurC == 65)
+                        if (TempT[4] < 59)
+                            TempT[4] += 1;
+                        else
+                            TempT[4] = 0;
+                    if (SetMenu_CurC == 41)
+                        if (TempT[3] < 23)
+                            TempT[3] += 1;
+                        else
+                            TempT[3] = 0;
+                }
+                else if (SetMenu_CurL == 7)
+                {
+                    if (SetMenu_CurC == 89)
+                        if (TempFI[2] < 59)
+                            TempFI[2] += 1;
+                        else
+                            TempFI[2] = 0;
+                    if (SetMenu_CurC == 65)
+                        if (TempFI[1] < 59)
+                            TempFI[1] += 1;
+                        else
+                            TempFI[1] = 0;
+                    if (SetMenu_CurC == 41)
+                        if (TempFI[0] < 23)
+                            TempFI[0] += 1;
+                        else
+                            TempFI[0] = 0;
+                }
             }
             KeyNum = 0;
             break;
         case 2: // Down键
-            OLED_Clear();
-            if (SetMenu_CurC == 112)
+            if (UIpage)
             {
-                SetMenu_CurL = 5;
-            }
-            else if (SetMenu_CurL == 3)
-            {
-                if (SetMenu_CurC == 89)
-                    if (TempT[5] > 0)
-                        TempT[5] -= 1;
-                    else
-                        TempT[5] = 59;
-                if (SetMenu_CurC == 65)
-                    if (TempT[4] > 0)
-                        TempT[4] -= 1;
-                    else
-                        TempT[4] = 59;
-                if (SetMenu_CurC == 41)
-                    if (TempT[3] > 0)
-                        TempT[3] -= 1;
-                    else
-                        TempT[3] = 23;
-            }
-            else if (SetMenu_CurL == 7)
-            {
-                if ((SetMenu_CurC == 89) && TempT[5])
-                    TempT[5] -= 1;
-                if ((SetMenu_CurC == 65) && TempT[4])
-                    TempT[4] -= 1;
-                if ((SetMenu_CurC == 41) && TempT[3])
-                    TempT[3] -= 1;
+                OLED_Clear();
+                if (SetMenu_CurC == 112)
+                {
+                    SetMenu_CurL = 5;
+                }
+                else if (SetMenu_CurL == 3)
+                {
+                    if (SetMenu_CurC == 89)
+                        if (TempT[5] > 0)
+                            TempT[5] -= 1;
+                        else
+                            TempT[5] = 59;
+                    if (SetMenu_CurC == 65)
+                        if (TempT[4] > 0)
+                            TempT[4] -= 1;
+                        else
+                            TempT[4] = 59;
+                    if (SetMenu_CurC == 41)
+                        if (TempT[3] > 0)
+                            TempT[3] -= 1;
+                        else
+                            TempT[3] = 23;
+                }
+                else if (SetMenu_CurL == 7)
+                {
+                    if (SetMenu_CurC == 89)
+                        if (TempFI[2] > 0)
+                            TempFI[2] -= 1;
+                        else
+                            TempFI[2] = 59;
+                    if (SetMenu_CurC == 65)
+                        if (TempFI[1] > 0)
+                            TempFI[1] -= 1;
+                        else
+                            TempFI[1] = 59;
+                    if (SetMenu_CurC == 41)
+                        if (TempFI[0] > 0)
+                            TempFI[0] -= 1;
+                        else
+                            TempFI[0] = 23;
+                }
             }
             KeyNum = 0;
             break;
