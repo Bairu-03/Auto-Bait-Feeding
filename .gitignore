@@ -1,0 +1,14 @@
+/.vscode/
+/Listings/
+
+*.axf
+*.crf
+*.d
+*.dep
+*.iex
+*.lnp
+*.htm
+*.o
+*.sct
+
+*.log
