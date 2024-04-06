@@ -1,10 +1,13 @@
 #include "stm32f10x.h"                  // Device header
 #include <time.h>
 
-uint16_t MyRTC_Time[] = {2024, 1, 1, 12, 30, 30};
+void MyRTC_SetTime(uint16_t *MyRTC_Time);
 
-void MyRTC_SetTime(void);
-
+/**
+ * @brief  RTC初始化, 默认时间:2024.1.1 12:30:30
+ * @param  无
+ * @retval 无
+ */
 void MyRTC_Init(void)
 {
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
@@ -12,8 +15,10 @@ void MyRTC_Init(void)
 
 	PWR_BackupAccessCmd(ENABLE);
 
-	if (BKP_ReadBackupRegister(BKP_DR1) != 0xA5A5)
+	if (BKP_ReadBackupRegister(BKP_DR1) != 0xFEFE)		// BKP_DR1寄存器内无标记值(VBAT断电), 执行RTC初始化
 	{
+		uint16_t Default_Time[] = {2024, 1, 1, 12, 30, 30};
+
 		RCC_LSEConfig(RCC_LSE_ON);
 		while (RCC_GetFlagStatus(RCC_FLAG_LSERDY) != SET);
 		
@@ -26,9 +31,9 @@ void MyRTC_Init(void)
 		RTC_SetPrescaler(32768 - 1);
 		RTC_WaitForLastTask();
 		
-		MyRTC_SetTime();
+		MyRTC_SetTime(Default_Time);
 		
-		BKP_WriteBackupRegister(BKP_DR1, 0xA5A5);
+		BKP_WriteBackupRegister(BKP_DR1, 0xFEFE);
 	}
 	else
 	{
@@ -37,7 +42,12 @@ void MyRTC_Init(void)
 	}
 }
 
-void MyRTC_SetTime(void)
+/**
+ * @brief  设置RTC时间
+ * @param  MyRTC_Time 时间值数组首地址, 长度:6, 0:年 | 1:月 | 2:日 | 3:时 | 4:分 | 5:秒
+ * @retval 无
+ */
+void MyRTC_SetTime(uint16_t *MyRTC_Time)
 {
 	time_t time_cnt;
 	struct tm time_date;
@@ -55,19 +65,27 @@ void MyRTC_SetTime(void)
 	RTC_WaitForLastTask();
 }
 
-void MyRTC_ReadTime(void)
+/**
+ * @brief  读取RTC时间
+ * @param  无
+ * @retval 时间值数组首地址, 长度:6, 0:年 | 1:月 | 2:日 | 3:时 | 4:分 | 5:秒
+ */
+uint16_t* MyRTC_ReadTime(void)
 {
 	time_t time_cnt;
 	struct tm time_date;
+	static uint16_t Read_Time[6];
 	
 	time_cnt = RTC_GetCounter() + 8 * 60 * 60;
 	
 	time_date = *localtime(&time_cnt);
 	
-	MyRTC_Time[0] = time_date.tm_year + 1900;
-	MyRTC_Time[1] = time_date.tm_mon + 1;
-	MyRTC_Time[2] = time_date.tm_mday;
-	MyRTC_Time[3] = time_date.tm_hour;
-	MyRTC_Time[4] = time_date.tm_min;
-	MyRTC_Time[5] = time_date.tm_sec;
+	Read_Time[0] = time_date.tm_year + 1900;
+	Read_Time[1] = time_date.tm_mon + 1;
+	Read_Time[2] = time_date.tm_mday;
+	Read_Time[3] = time_date.tm_hour;
+	Read_Time[4] = time_date.tm_min;
+	Read_Time[5] = time_date.tm_sec;
+	
+	return Read_Time;
 }

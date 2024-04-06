@@ -2,6 +2,7 @@
 /Listings/
 
 *.axf
+*.bak
 *.crf
 *.d
 *.dep

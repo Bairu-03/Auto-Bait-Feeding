@@ -70,8 +70,7 @@ void EXTI9_5_IRQHandler(void)
 	{
 		if(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_5) == 0)
 		{
-			// Delay_ms(20);
-			if(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_5) == 0)
+			while(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_5) == 0);
 				KeyNum = 5;
 		}
 		EXTI_ClearITPendingBit(EXTI_Line5);
@@ -82,8 +81,7 @@ void EXTI9_5_IRQHandler(void)
 	{
 		if(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_6) == 0)
 		{
-			// Delay_ms(20);
-			if(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_5) == 0)
+			while(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_6) == 0);
 				KeyNum = 4;
 		}
 		EXTI_ClearITPendingBit(EXTI_Line6);
@@ -94,8 +92,7 @@ void EXTI9_5_IRQHandler(void)
 	{
 		if(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_7) == 0)
 		{
-			// Delay_ms(20);
-			if(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_5) == 0)
+			while(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_7) == 0);
 				KeyNum = 6;
 		}
 		EXTI_ClearITPendingBit(EXTI_Line7);
@@ -109,8 +106,7 @@ void EXTI15_10_IRQHandler(void)
 	{
 		if(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_10) == 0)
 		{
-			// Delay_ms(20);
-			if(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_10) == 0)
+			while(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_10) == 0);
 				KeyNum = 8;
 		}
 		EXTI_ClearITPendingBit(EXTI_Line10);
@@ -121,8 +117,7 @@ void EXTI15_10_IRQHandler(void)
 	{
 		if(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_11) == 0)
 		{
-			// Delay_ms(20);
-			if(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_5) == 0)
+			while(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_11) == 0);
 				KeyNum = 2;
 		}
 		EXTI_ClearITPendingBit(EXTI_Line11);
@@ -133,8 +128,7 @@ void EXTI15_10_IRQHandler(void)
 	{
 		if(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_12) == 0)
 		{
-			// Delay_ms(20);
-			if(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_5) == 0)
+			while(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_12) == 0);
 				KeyNum = 1;
 		}
 		EXTI_ClearITPendingBit(EXTI_Line12);
