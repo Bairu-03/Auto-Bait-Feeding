@@ -41,6 +41,9 @@ void MyRTC_Init(void)
         RTC_WaitForLastTask();
     }
 
+    RTC_ITConfig(RTC_IT_SEC,ENABLE); // 使能RTC秒中断
+
+    // 配置RTC中断
 	EXTI_InitTypeDef EXTI_InitStructure;
 	EXTI_InitStructure.EXTI_Line = EXTI_Line17;
 	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
@@ -49,7 +52,7 @@ void MyRTC_Init(void)
 	EXTI_Init(&EXTI_InitStructure);
 
     NVIC_InitTypeDef NVIC_InitStructure;
-    NVIC_InitStructure.NVIC_IRQChannel = RTCAlarm_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannel = RTC_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
