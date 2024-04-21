@@ -13,7 +13,7 @@ uint8_t UIpage = 0;      // 显示界面标志. 0:主界面 | 1:设置界面
 uint8_t BaitWarning = 0; // 饵料余量标志. 0:充足 | 1:不足
 uint8_t WiFiState = 0;   // 网络连接状态标志. 0:已连接 | 1:未连接
 uint8_t TempEnable = 0;  // 温度传感器使能标志. 0:启用 | 1:禁用
-uint8_t Servoflag = 0;   // 投饵舵机启停标志. 0:停止 | 1:启动
+uint8_t Servoflag = 0;   // 投饵舵机启停标志（由闹钟中断控制）. 0:停止 | 1:启动
 char Feed_ED = '1';      // 自动投饵使能状态标志. '0':禁用 | '1':启用
 
 uint16_t *TempT; // 系统时间临时变量. 0:年 | 1:月 | 2:日 | 3:时 | 4:分 | 5:秒
@@ -26,7 +26,7 @@ float Temperature = 0;   // 温度
 // "设置"界面的光标位置
 uint8_t SetMenu_CurL, SetMenu_CurC;
 
-uint8_t Tuplaod = 0;
+uint8_t Tuplaod = 0;  // 上传数据标志
 
 /**
  * @brief  读取投饵间隔时间并设置RTC闹钟.
@@ -246,17 +246,28 @@ int main(void)
     OLED_ShowCN(1, 33, 26);
     OLED_ShowCN(1, 49, 27);
     OLED_ShowString(3, 1, "log:-", 8);
-    uint8_t netflag = 1;
+    uint8_t netflag = 1, timeout = 1;
     do
     {
+        OLED_ShowNum(3, 49, timeout, 1, 8);
         netflag = esp_Init();
-        OLED_ShowNum(3, 32, netflag, 1, 8);
-    } while (netflag); // 连接阿里云直到成功
-    WiFiState = 0;
+        OLED_ShowNum(3, 33, netflag, 1, 8);
+        if (timeout++ >= 5)
+        {
+            OLED_ShowString(3, 33, "TimeOut", 8);
+            Delay_ms(500);
+            break;
+        }
+    } while (netflag); // 连接阿里云, 连接失败超过五次自动放弃
+    if (netflag)
+        WiFiState = 1;
+    else
+        WiFiState = 0;
 
     while (1)
     {
-        if (Tuplaod > 5)
+        // 每隔5秒向云平台上传一次数据
+        if ((Tuplaod > 5) && (WiFiState == 0))
         {
             RTC_ITConfig(RTC_IT_SEC, DISABLE);
             if (Esp_PUB(FeedCount, (uint8_t)Temperature, Feed_ED, FeedInterval))
@@ -267,6 +278,7 @@ int main(void)
             RTC_ITConfig(RTC_IT_SEC, ENABLE);
         }
 
+        // 判断投饵使能状态
         if (Feed_ED == '1')
         {
             // 执行投饵
