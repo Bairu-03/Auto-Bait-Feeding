@@ -106,3 +106,37 @@ uint16_t *MyRTC_ReadTime(void)
 
     return Read_Time;
 }
+
+
+
+
+// 设置RTC闹钟定时 模板
+// void MyRTC_SetAlarm(void)
+// {
+//     uint32_t sec;
+//     // sec = xxx  // 触发下次闹钟中断所间隔的秒数
+//     RTC_EnterConfigMode();
+//     RTC_SetAlarm(RTC_GetCounter() + sec);
+//     RTC_WaitForLastTask();
+//     RTC_ExitConfigMode();
+//     RTC_ITConfig(RTC_IT_ALR, ENABLE);  // 使能RTC闹钟中断
+// }
+
+// RTC中断函数 模板
+// void RTC_IRQHandler(void)
+// {
+//     // 闹钟中断
+//     if (RTC_GetITStatus(RTC_IT_ALR) != RESET)
+//     {
+//         // 此处填写用户代码
+//         RTC_ClearITPendingBit(RTC_IT_ALR);
+//         MyRTC_SetAlarm();  // 中断后重设闹钟定时
+//     }
+//     // 秒中断
+//     if (RTC_GetITStatus(RTC_IT_SEC) != RESET)
+//     {
+//         // 此处填写用户代码
+//     }
+//     RTC_ClearITPendingBit(RTC_IT_SEC | RTC_IT_OW);
+//     RTC_WaitForLastTask();
+// }

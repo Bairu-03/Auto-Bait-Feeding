@@ -16,17 +16,14 @@ uint8_t TempEnable = 0;  // 温度传感器使能标志. 0:启用 | 1:禁用
 uint8_t Servoflag = 0;   // 投饵舵机启停标志（由闹钟中断控制）. 0:停止 | 1:启动
 char Feed_ED = '1';      // 自动投饵使能状态标志. '0':禁用 | '1':启用
 
-uint16_t *TempT; // 系统时间临时变量. 0:年 | 1:月 | 2:日 | 3:时 | 4:分 | 5:秒
-
-uint8_t FeedInterval[3]; // 投饵间隔
-uint8_t *TempFI;         // 投饵间隔临时变量
+uint8_t FeedInterval[3]; // 投饵间隔.  0:时 | 1:分 | 2:秒
 uint8_t FeedCount = 0;   // 投饵计次
 float Temperature = 0;   // 温度
 
 // "设置"界面的光标位置
 uint8_t SetMenu_CurL, SetMenu_CurC;
 
-uint8_t Tuplaod = 0;  // 上传数据标志
+uint8_t Tuplaod = 0; // 上传数据标志
 
 /**
  * @brief  读取投饵间隔时间并设置RTC闹钟.
@@ -45,11 +42,11 @@ void MyRTC_SetAlarm(void)
 
     if (FIsec)
     {
-        RTC_ITConfig(RTC_IT_ALR, ENABLE);
         RTC_EnterConfigMode();
         RTC_SetAlarm(RTC_GetCounter() + FIsec);
         RTC_WaitForLastTask();
         RTC_ExitConfigMode();
+        RTC_ITConfig(RTC_IT_ALR, ENABLE);
     }
     else
     {
@@ -76,32 +73,6 @@ void MainMenu(uint8_t SA_ST_M, uint8_t *FI_M, uint8_t BW_M, uint8_t WS_M, uint8_
             IntervalLine_Main = 3,
             TmpLine = 5,
             BaitLine = 7;
-
-    uint16_t *SysTime;
-
-    if (!SA_ST_M)
-    {
-        // 显示RTC时间
-        SysTime = MyRTC_ReadTime();
-        // "时间:xx:xx:xx"
-        OLED_ShowCN(TimeLine_Main, 1, 8);
-        OLED_ShowCN(TimeLine_Main, 17, 11);
-        OLED_ShowChar(TimeLine_Main, 33, ':', 8);
-        OLED_ShowNum(TimeLine_Main, 41, SysTime[3], 2, 8);
-        OLED_ShowChar(TimeLine_Main, 57, ':', 8);
-        OLED_ShowNum(TimeLine_Main, 65, SysTime[4], 2, 8);
-        OLED_ShowChar(TimeLine_Main, 81, ':', 8);
-        OLED_ShowNum(TimeLine_Main, 89, SysTime[5], 2, 8);
-    }
-    else
-    {
-        // "正在投饵..."
-        OLED_ShowCN(1, 1, 20);
-        OLED_ShowCN(1, 17, 21);
-        OLED_ShowCN(1, 33, 9);
-        OLED_ShowCN(1, 49, 10);
-        OLED_ShowString(1, 65, "...   ", 8);
-    }
 
     // "间隔:xx:xx:xx"
     OLED_ShowCN(IntervalLine_Main, 1, 11);
@@ -181,6 +152,32 @@ void MainMenu(uint8_t SA_ST_M, uint8_t *FI_M, uint8_t BW_M, uint8_t WS_M, uint8_
             OLED_ShowCN(TmpLine, 97, 7);
         }
     }
+
+    uint16_t *SysTime;
+
+    if (!SA_ST_M)
+    {
+        // 显示RTC时间
+        SysTime = MyRTC_ReadTime();
+        // "时间:xx:xx:xx"
+        OLED_ShowCN(TimeLine_Main, 1, 8);
+        OLED_ShowCN(TimeLine_Main, 17, 11);
+        OLED_ShowChar(TimeLine_Main, 33, ':', 8);
+        OLED_ShowNum(TimeLine_Main, 41, SysTime[3], 2, 8);
+        OLED_ShowChar(TimeLine_Main, 57, ':', 8);
+        OLED_ShowNum(TimeLine_Main, 65, SysTime[4], 2, 8);
+        OLED_ShowChar(TimeLine_Main, 81, ':', 8);
+        OLED_ShowNum(TimeLine_Main, 89, SysTime[5], 2, 8);
+    }
+    else
+    {
+        // "正在投饵..."
+        OLED_ShowCN(1, 1, 20);
+        OLED_ShowCN(1, 17, 21);
+        OLED_ShowCN(1, 33, 9);
+        OLED_ShowCN(1, 49, 10);
+        OLED_ShowString(1, 65, "...   ", 8);
+    }
 }
 
 /**
@@ -252,13 +249,13 @@ int main(void)
         OLED_ShowNum(3, 49, timeout, 1, 8);
         netflag = esp_Init();
         OLED_ShowNum(3, 33, netflag, 1, 8);
-        if (timeout++ >= 5)
+        if (timeout++ >= 3)
         {
             OLED_ShowString(3, 33, "TimeOut", 8);
             Delay_ms(500);
             break;
         }
-    } while (netflag); // 连接阿里云, 连接失败超过五次自动放弃
+    } while (netflag); // 连接阿里云, 连接失败超过3次自动放弃
     if (netflag)
         WiFiState = 1;
     else
@@ -319,6 +316,9 @@ int main(void)
             BaitWarning = 0;
         }
 
+        uint16_t *TempT; // 系统时间临时变量. 0:年 | 1:月 | 2:日 | 3:时 | 4:分 | 5:秒
+        uint32_t TTT;   // 用于判断处于设置界面时系统时间是否被更改
+        uint8_t *TempFI; // 投饵间隔临时变量. 0:时 | 1:分 | 2:秒
         switch (KeyNum)
         {
         case 5: // 菜单、确定键
@@ -327,6 +327,7 @@ int main(void)
             {
                 RTC_ITConfig(RTC_IT_ALR, DISABLE); // 禁用闹钟中断(停止自动投饵)
                 TempT = MyRTC_ReadTime();
+                TTT = TempT[3] * 10000 + TempT[4] * 100 + TempT[5];
                 TempFI = FeedInterval;
                 SetMenu_CurL = 1;
                 SetMenu_CurC = 112;
@@ -335,13 +336,15 @@ int main(void)
             }
             else // 保存改动, 设置界面 -> 主界面
             {
-                MyRTC_SetTime(TempT);
+                if (TempT[3] * 10000 + TempT[4] * 100 + TempT[5] != TTT)
+                    MyRTC_SetTime(TempT);
                 for (uint8_t j = 0x00, i = 0; i <= 2; i++, j += 0x04)
                 {
                     FeedInterval[i] = TempFI[i];
                     BKP_WriteBackupRegister(BKP_DR2 + j, FeedInterval[i]);
                 }
                 MyRTC_SetAlarm();
+                Servoflag = 0;
                 MainMenu(Servoflag, FeedInterval, BaitWarning, WiFiState, TempEnable);
                 UIpage = 0;
             }
@@ -405,16 +408,19 @@ int main(void)
                 }
                 else if (SetMenu_CurL == 3)
                 {
+                    // 秒
                     if (SetMenu_CurC == 89)
                         if (TempT[5] < 59)
                             TempT[5] += 1;
                         else
                             TempT[5] = 0;
+                    // 分
                     if (SetMenu_CurC == 65)
                         if (TempT[4] < 59)
                             TempT[4] += 1;
                         else
                             TempT[4] = 0;
+                    // 时
                     if (SetMenu_CurC == 41)
                         if (TempT[3] < 23)
                             TempT[3] += 1;
